@@ -12,7 +12,10 @@ class Main
 
         $global_middlewares = ['ExampleMiddleware'];
 
-        $uri = implode('', explode(Config::Get('router_base'), $_SERVER['REQUEST_URI'], 2));
+        $uri = $_SERVER['REQUEST_URI'];
+        if (Config::Get('router_base') != '') {
+            $uri = implode('', explode(Config::Get('router_base'), $uri, 2));
+        }
         $request = new Request($uri, $_SERVER['REQUEST_METHOD']);
 
         Log::Write('Routing', 'started: ' . $request->Serialize());

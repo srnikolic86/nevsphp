@@ -10,7 +10,7 @@ class Main
         $DB = new Database();
         date_default_timezone_set(Config::Get('timezone'));
 
-        $global_middlewares = ['ExampleMiddleware'];
+        $global_middlewares = [];
 
         $uri = $_SERVER['REQUEST_URI'];
         if (Config::Get('router_base') != '') {

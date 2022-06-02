@@ -12,7 +12,7 @@ class Main
 
         $global_middlewares = [];
 
-        $uri = $_SERVER['REQUEST_URI'];
+        $uri = explode('?', $_SERVER['REQUEST_URI'])[0];
         if (Config::Get('router_base') != '') {
             $uri = implode('', explode(Config::Get('router_base'), $uri, 2));
         }

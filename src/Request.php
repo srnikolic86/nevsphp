@@ -6,13 +6,13 @@ class Request
 {
     public array $parameters = [];
     public array $data = [];
+    public array $files = [];
 
     public function __construct(public string $url, public string $method)
     {
         if ($method == 'GET') {
             $this->data = $_GET;
-        }
-        if ($this->method == 'POST') {
+        } else {
             $this->data = $_POST;
             $raw_content = file_get_contents('php://input');
             if ($raw_content != '') {
@@ -23,6 +23,7 @@ class Request
                     Log::Write('Request', 'malformed JSON data');
                 }
             }
+            $this->files = $_FILES;
         }
     }
 

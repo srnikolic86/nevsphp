@@ -155,15 +155,16 @@ class Model implements JsonSerializable
         $class = get_called_class();
         $object = new $class();
 
+        $final_results = [];
         $query = "SELECT * FROM `" . mysqli_real_escape_string($DB->db, $object->table) . "` WHERE " . $where;
         $results = $DB->ExecuteSelect($query, $params);
         if ($results !== false) {
             foreach ($results as $row) {
-                $results[] = $object::MakeFromRawData($row);
+                $final_results[] = $object::MakeFromRawData($row);
             }
         }
 
-        return ($results !== false) ? $results : [];
+        return $final_results;
     }
 
     static function GetModel(): array

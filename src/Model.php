@@ -11,7 +11,6 @@ class Model implements JsonSerializable
     public string $table;
     public string $id_field;
     public array $hidden;
-    public array $hidden_values;
 
     public function __construct()
     {
@@ -146,12 +145,6 @@ class Model implements JsonSerializable
         }
 
         if ($data === null) return null;
-        foreach ($data as $key => $value) {
-            if (in_array($key, $object->hidden)) {
-                $hidden_values[$key] = $data[$key];
-                unset($data[$key]);
-            }
-        }
 
         return $object::MakeFromRawData($data);
     }
@@ -198,12 +191,6 @@ class Model implements JsonSerializable
     {
         $class = get_called_class();
         $object = new $class();
-        foreach ($data as $key => $value) {
-            if (in_array($key, $object->hidden)) {
-                $hidden_values[$key] = $data[$key];
-                unset($data[$key]);
-            }
-        }
         $object->nevs_raw_data = $object::PrepareDataFromDB($data);
         return $object;
     }
@@ -296,6 +283,12 @@ class Model implements JsonSerializable
 
     public function jsonSerialize(): mixed
     {
-        return $this->nevs_raw_data;
+        $data = $this->nevs_raw_data;
+        foreach ($data as $key => $value) {
+            if (in_array($key, $this->hidden)) {
+                unset($data[$key]);
+            }
+        }
+        return $data;
     }
 }

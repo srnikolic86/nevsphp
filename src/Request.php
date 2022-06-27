@@ -51,7 +51,7 @@ class Request
                         }
                         break;
                     case 'float':
-                        if (!is_float($value)) {
+                        if (!is_float($value) && !is_int($value)) {
                             $valid = false;
                         }
                         break;

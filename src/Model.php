@@ -205,7 +205,7 @@ class Model implements JsonSerializable
         return $object;
     }
 
-    private static function PrepareDataForDB(array $data): array
+    protected static function PrepareDataForDB(array $data): array
     {
         global $DB;
 
@@ -246,7 +246,7 @@ class Model implements JsonSerializable
         return $data;
     }
 
-    private static function PrepareDataFromDB(array $data): array
+    protected static function PrepareDataFromDB(array $data): array
     {
         global $DB;
 

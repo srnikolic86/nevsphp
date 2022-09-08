@@ -105,7 +105,7 @@ class Migrations
                     echo("\e[33m" . $migration_name . "\n\r");
                 }
                 $migration = new $migration_name();
-                $migration->migrate();
+                $migration->migrate($DB);
 
                 $query = "INSERT INTO `" . mysqli_real_escape_string($db, $config['migrations_table']) . "` (`name`) VALUES(?)";
                 $stmt = $db->prepare($query);

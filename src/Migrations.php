@@ -4,11 +4,14 @@ namespace Nevs;
 
 class Migrations
 {
-    public static function Migrate(bool $fresh = false): void
+    public static function Migrate(bool $fresh = false, bool $output = true, array|null $config = null): void
     {
         date_default_timezone_set(Config::Get('timezone'));
 
         $DB = new Database();
+        if ($config !== null) {
+            $DB->LoadConfig($config);
+        }
         $db = $DB->db;
 
         if ($handle = opendir(Config::Get('app_root') . Config::Get('db.migrations_folder'))) {
@@ -29,7 +32,9 @@ class Migrations
                 $db->query("DROP TABLE `" . mysqli_real_escape_string($db, $table['Tables_in_' . Config::Get('db.database')]) . "`");
             }
             $db->query("SET foreign_key_checks = 1");
-            echo("\e[31mdatabase emptied\n\r");
+            if ($output) {
+                echo("\e[31mdatabase emptied\n\r");
+            }
         }
 
         $migrations_table_exists = false;
@@ -94,7 +99,9 @@ class Migrations
             }
             if (!$migration_resolved) {
                 $migrated = true;
-                echo("\e[33m" . $migration_name . "\n\r");
+                if ($output) {
+                    echo("\e[33m" . $migration_name . "\n\r");
+                }
                 $migration = new $migration_name();
                 $migration->migrate();
 
@@ -104,10 +111,12 @@ class Migrations
             }
         }
 
-        if (!$migrated) {
+        if (!$migrated && $output) {
             echo("\e[33mnothing to migrate\n\r");
         }
 
-        echo("\e[32m---done---\e[39m\n\r");
+        if ($output) {
+            echo("\e[32m---done---\e[39m\n\r");
+        }
     }
 }

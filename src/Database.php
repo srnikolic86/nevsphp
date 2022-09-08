@@ -5,17 +5,28 @@ namespace Nevs;
 class Database
 {
     public \mysqli|null $db;
+    private array $config;
 
     public function __construct()
     {
+        $this->LoadConfig(Config::Get('db'));
+    }
+
+    public function LoadConfig(array $config): void {
+        $this->config = $config;
+        $this->LoadDatabase();
+    }
+
+    private function LoadDatabase(): void
+    {
         $this->db = null;
         try {
-            $this->db = new \mysqli(Config::Get('db.host'), Config::Get('db.username'), Config::Get('db.password'), Config::Get('db.database'));
+            $this->db = new \mysqli($this->config['host'], $this->config['username'], $this->config['password'], $this->config['database']);
         } catch (\Exception $e) {
             Log::Write('Database', 'cannot connect to db');
             die($e->getMessage());
         }
-        $this->db->set_charset(Config::Get('db.charset'));
+        $this->db->set_charset($this->config['charset']);
     }
 
     public function CreateTable(array $data): bool
@@ -57,7 +68,7 @@ class Database
 
         foreach ($relations as $relation) {
             $foreign_ids[$relation['foreign_key']] = null;
-            $query = 'SELECT * FROM `' . Config::Get('db.model_table') . '` WHERE `table`=? AND `primary_key`=1';
+            $query = 'SELECT * FROM `' . $this->config['model_table'] . '` WHERE `table`=? AND `primary_key`=1';
             $stmt = $this->db->prepare($query);
             $stmt->execute([$relation['foreign_key']]);
             $results = $stmt->get_result();
@@ -74,7 +85,7 @@ class Database
             $related_field = (isset($field['foreign_key']) && isset($foreign_ids[$field['foreign_key']])) ? $foreign_ids[$field['foreign_key']] : null;
             $nullable = (isset($field['nullable']) && $field['nullable'] === true) ? 1 : 0;
             $primary_key = (isset($field['primary_key']) && $field['primary_key'] === true) ? 1 : 0;
-            $query = 'INSERT INTO `' . Config::Get('db.model_table') . '` (`table`, `field`, `type`, `nullable`, `primary_key`, `related_table`, `related_field`) VALUES (?, ?, ?, ?, ?, ?, ?)';
+            $query = 'INSERT INTO `' . $this->config['model_table'] . '` (`table`, `field`, `type`, `nullable`, `primary_key`, `related_table`, `related_field`) VALUES (?, ?, ?, ?, ?, ?, ?)';
             $stmt = $this->db->prepare($query);
             $stmt->execute([$data['name'], $field['name'], $field['type'], $nullable, $primary_key, $related_table, $related_field]);
         }
@@ -102,7 +113,7 @@ class Database
             $relations = [];
             foreach ($data['modify'] as $field) {
                 //drop foreign key if needed
-                $query = 'SELECT * FROM `' . Config::Get('db.model_table') . '` WHERE `table`=? AND `field`=? AND related_table IS NOT NULL;';
+                $query = 'SELECT * FROM `' . $this->config['model_table'] . '` WHERE `table`=? AND `field`=? AND related_table IS NOT NULL;';
                 $stmt = $this->db->prepare($query);
                 $stmt->execute([$data['name'], $field['old_name']]);
                 $results = $stmt->get_result();
@@ -132,7 +143,7 @@ class Database
             $foreign_ids = [];
             foreach ($relations as $relation) {
                 $relation_exists = false;
-                $query = 'SELECT * FROM `' . Config::Get('db.model_table') . '` WHERE `table`=? AND `field`=? AND related_table=?;';
+                $query = 'SELECT * FROM `' . $this->config['model_table'] . '` WHERE `table`=? AND `field`=? AND related_table=?;';
                 $stmt = $this->db->prepare($query);
                 $stmt->execute([$data['name'], $relation['new_name'], $relation['foreign_key']]);
                 $results = $stmt->get_result();
@@ -141,7 +152,7 @@ class Database
                 }
                 if (!$relation_exists) {
                     $foreign_ids[$relation['foreign_key']] = null;
-                    $query = 'SELECT * FROM `' . Config::Get('db.model_table') . '` WHERE `table`=? AND `primary_key`=1';
+                    $query = 'SELECT * FROM `' . $this->config['model_table'] . '` WHERE `table`=? AND `primary_key`=1';
                     $stmt = $this->db->prepare($query);
                     $stmt->execute([$relation['foreign_key']]);
                     $results = $stmt->get_result();
@@ -159,7 +170,7 @@ class Database
                 $related_field = (isset($field['foreign_key']) && isset($foreign_ids[$field['foreign_key']])) ? $foreign_ids[$field['foreign_key']] : null;
                 $nullable = (isset($field['nullable']) && $field['nullable'] === true) ? 1 : 0;
                 $primary_key = (isset($field['primary_key']) && $field['primary_key'] === true) ? 1 : 0;
-                $query = 'UPDATE `' . Config::Get('db.model_table') . '` SET `field`=?, `type`=?, `nullable`=?, `primary_key`=?, `related_table`=?, `related_field`=? WHERE `table`=? AND `field`=?';
+                $query = 'UPDATE `' . $this->config['model_table'] . '` SET `field`=?, `type`=?, `nullable`=?, `primary_key`=?, `related_table`=?, `related_field`=? WHERE `table`=? AND `field`=?';
                 $stmt = $this->db->prepare($query);
                 $stmt->execute([$field['new_name'], $field['type'], $nullable, $primary_key, $related_table, $related_field, $data['name'], $field['old_name']]);
             }
@@ -188,7 +199,7 @@ class Database
             $foreign_ids = [];
             foreach ($relations as $relation) {
                 $foreign_ids[$relation['foreign_key']] = null;
-                $query = 'SELECT * FROM `' . Config::Get('db.model_table') . '` WHERE `table`=? AND `primary_key`=1';
+                $query = 'SELECT * FROM `' . $this->config['model_table'] . '` WHERE `table`=? AND `primary_key`=1';
                 $stmt = $this->db->prepare($query);
                 $stmt->execute([$relation['foreign_key']]);
                 $results = $stmt->get_result();
@@ -205,7 +216,7 @@ class Database
                 $related_field = (isset($field['foreign_key']) && isset($foreign_ids[$field['foreign_key']])) ? $foreign_ids[$field['foreign_key']] : null;
                 $nullable = (isset($field['nullable']) && $field['nullable'] === true) ? 1 : 0;
                 $primary_key = (isset($field['primary_key']) && $field['primary_key'] === true) ? 1 : 0;
-                $query = 'INSERT INTO `' . Config::Get('db.model_table') . '` (`table`, `field`, `type`, `nullable`, `primary_key`, `related_table`, `related_field`) VALUES (?, ?, ?, ?, ?, ?, ?)';
+                $query = 'INSERT INTO `' . $this->config['model_table'] . '` (`table`, `field`, `type`, `nullable`, `primary_key`, `related_table`, `related_field`) VALUES (?, ?, ?, ?, ?, ?, ?)';
                 $stmt = $this->db->prepare($query);
                 $stmt->execute([$data['name'], $field['name'], $field['type'], $nullable, $primary_key, $related_table, $related_field]);
             }
@@ -215,7 +226,7 @@ class Database
         if (isset($data['remove'])) {
             foreach ($data['remove'] as $field) {
                 //drop foreign key if needed
-                $query = 'SELECT * FROM `' . Config::Get('db.model_table') . '` WHERE `table`=? AND `field`=? AND related_table IS NOT NULL';
+                $query = 'SELECT * FROM `' . $this->config['model_table'] . '` WHERE `table`=? AND `field`=? AND related_table IS NOT NULL';
                 $stmt = $this->db->prepare($query);
                 $stmt->execute([$field]);
                 $results = $stmt->get_result();
@@ -230,7 +241,7 @@ class Database
             }
             //remove from model table
             foreach ($data['remove'] as $field) {
-                $query = 'DELETE FROM `' . Config::Get('db.model_table') . '` WHERE `table`=? AND `field`=?';
+                $query = 'DELETE FROM `' . $this->config['model_table'] . '` WHERE `table`=? AND `field`=?';
                 $stmt = $this->db->prepare($query);
                 $stmt->execute([$data['name'], $field]);
             }
@@ -253,7 +264,7 @@ class Database
         if (!$table_exists) return false;
 
         //drop the foreign keys
-        $query = 'SELECT * FROM `' . Config::Get('db.model_table') . '` WHERE (`table`=? AND `related_table` IS NOT NULL) OR `related_table`=?;';
+        $query = 'SELECT * FROM `' . $this->config['model_table'] . '` WHERE (`table`=? AND `related_table` IS NOT NULL) OR `related_table`=?;';
         $stmt = $this->db->prepare($query);
         $stmt->execute([$table_name, $table_name]);
         $results = $stmt->get_result();

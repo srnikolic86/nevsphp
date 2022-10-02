@@ -72,7 +72,7 @@ class Migrations
             $queue_table_exists = true;
         }
         if (!$queue_table_exists) {
-            $db->query("CREATE TABLE `" . mysqli_real_escape_string($db, $config['queue_table']) . "` ( `id` INT NOT NULL AUTO_INCREMENT , `queue` VARCHAR(255) NOT NULL, `command` VARCHAR(255) NOT NULL , `data` LONGTEXT NOT NULL DEFAULT '0' , `processing` INT NOT NULL DEFAULT 0, PRIMARY KEY (`id`)) ENGINE = InnoDB;");
+            $db->query("CREATE TABLE `" . mysqli_real_escape_string($db, $config['queue_table']) . "` ( `id` INT NOT NULL AUTO_INCREMENT , `queue` VARCHAR(255) NOT NULL, `command` VARCHAR(255) NOT NULL , `data` LONGTEXT NOT NULL , `processing` INT NOT NULL DEFAULT 0, PRIMARY KEY (`id`)) ENGINE = InnoDB;");
         }
 
         $migration_files = [];

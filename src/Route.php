@@ -25,7 +25,7 @@ class Route extends RouterMember
             if (count($this->parameters) != count($request_array) - count($route_array)) return null;
             for ($i = count($route_array); $i < count($request_array); $i++) {
                 Log::Write('Routing', 'checking element: ' . $i);
-                $request->parameters[$this->parameters[$i - count($route_array)]] = $request_array[$i];
+                $request->parameters[$this->parameters[$i - count($route_array)]] = urldecode($request_array[$i]);
             }
             return $this;
         }

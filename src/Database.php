@@ -107,11 +107,13 @@ class Database
         }
         if (!$table_exists) return false;
 
+        $fields = $data['fields'];
+
         //modify fields
-        if (isset($data['modify'])) {
+        if (isset($fields['modify'])) {
             //modify actual fields, identify new relations and drop old foreign keys
             $relations = [];
-            foreach ($data['modify'] as $field) {
+            foreach ($fields['modify'] as $field) {
                 //drop foreign key if needed
                 $query = 'SELECT * FROM `' . $this->config['model_table'] . '` WHERE `table`=? AND `field`=? AND related_table IS NOT NULL;';
                 $stmt = $this->db->prepare($query);
@@ -165,7 +167,7 @@ class Database
                 }
             }
             //modify model table
-            foreach ($data['modify'] as $field) {
+            foreach ($fields['modify'] as $field) {
                 $related_table = (isset($field['foreign_key'])) ? $field['foreign_key'] : null;
                 $related_field = (isset($field['foreign_key']) && isset($foreign_ids[$field['foreign_key']])) ? $foreign_ids[$field['foreign_key']] : null;
                 $nullable = (isset($field['nullable']) && $field['nullable'] === true) ? 1 : 0;
@@ -177,10 +179,10 @@ class Database
         }
 
         //add fields
-        if (isset($data['add'])) {
+        if (isset($fields['add'])) {
             //add actual fields and identify relations
             $relations = [];
-            foreach ($data['add'] as $field) {
+            foreach ($fields['add'] as $field) {
                 if (isset($field['foreign_key'])) $relations[] = $field;
                 $field_type = null;
                 $field_length = null;
@@ -211,7 +213,7 @@ class Database
                 }
             }
             //add to model table
-            foreach ($data['add'] as $field) {
+            foreach ($fields['add'] as $field) {
                 $related_table = (isset($field['foreign_key'])) ? $field['foreign_key'] : null;
                 $related_field = (isset($field['foreign_key']) && isset($foreign_ids[$field['foreign_key']])) ? $foreign_ids[$field['foreign_key']] : null;
                 $nullable = (isset($field['nullable']) && $field['nullable'] === true) ? 1 : 0;
@@ -223,8 +225,8 @@ class Database
         }
 
         //remove fields
-        if (isset($data['remove'])) {
-            foreach ($data['remove'] as $field) {
+        if (isset($fields['remove'])) {
+            foreach ($fields['remove'] as $field) {
                 //drop foreign key if needed
                 $query = 'SELECT * FROM `' . $this->config['model_table'] . '` WHERE `table`=? AND `field`=? AND related_table IS NOT NULL';
                 $stmt = $this->db->prepare($query);
@@ -240,7 +242,7 @@ class Database
                 if ($this->db->query($query) === false) return false;
             }
             //remove from model table
-            foreach ($data['remove'] as $field) {
+            foreach ($fields['remove'] as $field) {
                 $query = 'DELETE FROM `' . $this->config['model_table'] . '` WHERE `table`=? AND `field`=?';
                 $stmt = $this->db->prepare($query);
                 $stmt->execute([$data['name'], $field]);

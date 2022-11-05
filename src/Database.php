@@ -310,6 +310,9 @@ class Database
             case 'bool':
                 $out_type = 'INT';
                 break;
+            case 'bigint':
+                $out_type = 'BIGINT';
+                break;
             case 'float':
                 $out_type = 'FLOAT';
                 break;

@@ -360,6 +360,9 @@ class Database
             $query .= ' NOT NULL ';
         }
         if ($default !== null) {
+            if (!in_array($type, ['INT', 'BIGINT', 'FLOAT', 'DOUBLE'])) {
+                $default = "'" . $default . "'";
+            }
             $query .= ' DEFAULT ' . $default;
         }
         if ($auto_increment != null) {

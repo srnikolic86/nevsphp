@@ -263,7 +263,7 @@ class Model implements JsonSerializable
                     }
                     break;
                 case 'json':
-                    $data[$field] = json_decode($value, true);
+                    if ($value !== null) $data[$field] = json_decode($value, true);
                     break;
                 case 'bool':
                     $data[$field] = $value == 1;

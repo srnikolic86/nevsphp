@@ -230,7 +230,7 @@ class Database
                 //drop foreign key if needed
                 $query = 'SELECT * FROM `' . $this->config['model_table'] . '` WHERE `table`=? AND `field`=? AND related_table IS NOT NULL';
                 $stmt = $this->db->prepare($query);
-                $stmt->execute([$field]);
+                $stmt->execute([$data['name'], $field]);
                 $results = $stmt->get_result();
                 while ($record = $results->fetch_assoc()) {
                     $query = 'ALTER TABLE `' . mysqli_real_escape_string($this->db, $record['table']) . '` DROP FOREIGN KEY `' . $record['table'] . '_' . $record['field'] . '_' . $record['related_table'] . '`';

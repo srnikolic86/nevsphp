@@ -279,6 +279,11 @@ class Database
         //drop the table
         $this->db->query('DROP TABLE `' . $table_name . '`');
 
+        //delete from model
+        $query = 'DELETE FROM `' . $this->config['model_table'] . '` WHERE `table`=?';
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([$table_name]);
+
         return true;
     }
 

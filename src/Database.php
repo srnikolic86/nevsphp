@@ -283,6 +283,10 @@ class Database
         $query = 'DELETE FROM `' . $this->config['model_table'] . '` WHERE `table`=?';
         $stmt = $this->db->prepare($query);
         $stmt->execute([$table_name]);
+        $query = "UPDATE `" . $this->config['model_table'] . "` SET `related_table`=NULL, `related_field`=NULL WHERE `related_table`=?";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([$table_name]);
+
 
         return true;
     }

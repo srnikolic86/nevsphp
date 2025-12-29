@@ -296,6 +296,7 @@ class Database
     public function Execute(string $statement, array $params = []): \mysqli_stmt | false
     {
         if ($this->query_callback != null) {
+            error_log('Query callback not null');
             ($this->query_callback)($statement, $params);
         }
         $stmt = $this->db->prepare($statement);
@@ -306,6 +307,7 @@ class Database
     public function ExecuteSelect(string $statement, array $params = []): array|false
     {
         if ($this->query_callback != null) {
+            error_log('Query callback not null');
             ($this->query_callback)($statement, $params);
         }
         $stmt = $this->Execute($statement, $params);
@@ -316,6 +318,7 @@ class Database
     public function ExecuteInsert(string $statement, array $params = []): int|string|false
     {
         if ($this->query_callback != null) {
+            error_log('Query callback not null');
             ($this->query_callback)($statement, $params);
         }
         $stmt = $this->Execute($statement, $params);
@@ -392,6 +395,7 @@ class Database
     }
 
     public function SetQueryCallback(callable $function): void {
+        error_log('Set query callback');
         $this->query_callback = $function;
     }
 }

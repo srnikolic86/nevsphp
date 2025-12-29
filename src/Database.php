@@ -7,6 +7,8 @@ class Database
     public \mysqli|null $db;
     private array $config;
 
+    private $query_callback = null;
+
     public function __construct()
     {
         $this->LoadConfig(Config::Get('db'));
@@ -293,6 +295,9 @@ class Database
 
     public function Execute(string $statement, array $params = []): \mysqli_stmt | false
     {
+        if ($this->query_callback != null) {
+            ($this->query_callback)($statement, $params);
+        }
         $stmt = $this->db->prepare($statement);
         if ($stmt->execute($params) === false) return false;
         return $stmt;
@@ -300,6 +305,9 @@ class Database
 
     public function ExecuteSelect(string $statement, array $params = []): array|false
     {
+        if ($this->query_callback != null) {
+            ($this->query_callback)($statement, $params);
+        }
         $stmt = $this->Execute($statement, $params);
         if ($stmt === false) return false;
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
@@ -307,6 +315,9 @@ class Database
 
     public function ExecuteInsert(string $statement, array $params = []): int|string|false
     {
+        if ($this->query_callback != null) {
+            ($this->query_callback)($statement, $params);
+        }
         $stmt = $this->Execute($statement, $params);
         if ($stmt === false) return false;
         return $stmt->insert_id;
@@ -378,5 +389,9 @@ class Database
             $query .= ' AUTO_INCREMENT ';
         }
         return $query;
+    }
+
+    public function SetQueryCallback(callable $function): void {
+        $this->query_callback = $function;
     }
 }

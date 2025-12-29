@@ -30,9 +30,12 @@ class Main
 
                 $response = null;
 
+                $middleware_objects = [];
+
                 foreach (array_merge($global_middlewares, $middlewares) as $middleware_name) {
                     $middleware_class = "App\\Middleware\\" . $middleware_name;
                     $middleware = new $middleware_class();
+                    $middleware_objects[$middleware_name] = $middleware;
                     if ($middleware instanceof Middleware) {
                         $result = $middleware->Before($request);
                         if ($result !== null) {
@@ -47,6 +50,7 @@ class Main
                         foreach (array_reverse(array_merge($global_middlewares, $middlewares)) as $middleware_name) {
                             $middleware_class = "App\\Middleware\\" . $middleware_name;
                             $middleware = new $middleware_class();
+                            if (isset($middleware_objects[$middleware_name])) $middleware = $middleware_objects[$middleware_name];
                             if ($middleware instanceof Middleware) {
                                 $middleware->After($request, $response);
                             }

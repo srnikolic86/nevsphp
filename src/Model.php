@@ -282,6 +282,11 @@ class Model implements JsonSerializable
         return null;
     }
 
+    public function __set($varName, $value)
+    {
+        $this->nevs_raw_data[$varName] = $value;
+    }
+
     public function jsonSerialize(): mixed
     {
         $data = $this->nevs_raw_data;

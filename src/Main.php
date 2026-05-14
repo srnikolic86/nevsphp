@@ -46,15 +46,14 @@ class Main
                 }
                 if ($response === null) {
                     $response = $controller->$function();
-                    if ($response instanceof Response) {
-                        foreach (array_reverse(array_merge($global_middlewares, $middlewares)) as $middleware_name) {
-                            $middleware_class = "App\\Middleware\\" . $middleware_name;
-                            $middleware = new $middleware_class();
-                            if (isset($middleware_objects[$middleware_name])) $middleware = $middleware_objects[$middleware_name];
-                            if ($middleware instanceof Middleware) {
-                                $middleware->After($request, $response);
-                            }
-                        }
+                }
+
+                foreach (array_reverse(array_merge($global_middlewares, $middlewares)) as $middleware_name) {
+                    $middleware_class = "App\\Middleware\\" . $middleware_name;
+                    $middleware = new $middleware_class();
+                    if (isset($middleware_objects[$middleware_name])) $middleware = $middleware_objects[$middleware_name];
+                    if ($middleware instanceof Middleware) {
+                        $middleware->After($request, $response);
                     }
                 }
 

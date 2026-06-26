@@ -78,7 +78,7 @@ class Database
                 $foreign_ids[$relation['foreign_key']] = $result['field'];
             }
             if ($foreign_ids[$relation['foreign_key']] !== null) {
-                $this->db->query('ALTER TABLE `' . mysqli_real_escape_string($this->db, $data['name']) . '` ADD CONSTRAINT `' . mysqli_real_escape_string($this->db, $data['name'] . '_' . $relation['name'] . '_' . $relation['foreign_key']) . '` FOREIGN KEY (`' . mysqli_real_escape_string($this->db, $relation['name']) . '`) REFERENCES `' . mysqli_real_escape_string($this->db, $relation['foreign_key']) . '`(`' . mysqli_real_escape_string($this->db, $foreign_ids[$relation['foreign_key']]) . '`) ON DELETE RESTRICT ON UPDATE RESTRICT;');
+                $this->db->query('ALTER TABLE `' . mysqli_real_escape_string($this->db, $data['name']) . '` ADD CONSTRAINT `' . mysqli_real_escape_string($this->db, $this->MakeConstraintName($data['name'], $relation['name'], $relation['foreign_key'])) . '` FOREIGN KEY (`' . mysqli_real_escape_string($this->db, $relation['name']) . '`) REFERENCES `' . mysqli_real_escape_string($this->db, $relation['foreign_key']) . '`(`' . mysqli_real_escape_string($this->db, $foreign_ids[$relation['foreign_key']]) . '`) ON DELETE RESTRICT ON UPDATE RESTRICT;');
             }
         }
 
@@ -123,7 +123,7 @@ class Database
                 $results = $stmt->get_result();
                 while ($record = $results->fetch_assoc()) {
                     if (!isset($field['foreign_key']) || $field['foreign_key'] != $record['related_table'] || $field['new_name'] != $field['old_name']) {
-                        $query = 'ALTER TABLE `' . mysqli_real_escape_string($this->db, $record['table']) . '` DROP FOREIGN KEY `' . $record['table'] . '_' . $record['field'] . '_' . $record['related_table'] . '`';
+                        $query = 'ALTER TABLE `' . mysqli_real_escape_string($this->db, $record['table']) . '` DROP FOREIGN KEY `' . $this->MakeConstraintName($record['table'], $record['field'], $record['related_table']) . '`';
                         $stmt2 = $this->db->prepare($query);
                         $stmt2->execute();
                     }
@@ -164,7 +164,7 @@ class Database
                         $foreign_ids[$relation['foreign_key']] = $result['field'];
                     }
                     if ($foreign_ids[$relation['foreign_key']] !== null) {
-                        $this->db->query('ALTER TABLE `' . mysqli_real_escape_string($this->db, $data['name']) . '` ADD CONSTRAINT `' . mysqli_real_escape_string($this->db, $data['name'] . '_' . $relation['new_name'] . '_' . $relation['foreign_key']) . '` FOREIGN KEY (`' . mysqli_real_escape_string($this->db, $relation['new_name']) . '`) REFERENCES `' . mysqli_real_escape_string($this->db, $relation['foreign_key']) . '`(`' . mysqli_real_escape_string($this->db, $foreign_ids[$relation['foreign_key']]) . '`) ON DELETE RESTRICT ON UPDATE RESTRICT;');
+                        $this->db->query('ALTER TABLE `' . mysqli_real_escape_string($this->db, $data['name']) . '` ADD CONSTRAINT `' . mysqli_real_escape_string($this->db, $this->MakeConstraintName($data['name'], $relation['new_name'], $relation['foreign_key'])) . '` FOREIGN KEY (`' . mysqli_real_escape_string($this->db, $relation['new_name']) . '`) REFERENCES `' . mysqli_real_escape_string($this->db, $relation['foreign_key']) . '`(`' . mysqli_real_escape_string($this->db, $foreign_ids[$relation['foreign_key']]) . '`) ON DELETE RESTRICT ON UPDATE RESTRICT;');
                     }
                 }
             }
@@ -211,7 +211,7 @@ class Database
                     $foreign_ids[$relation['foreign_key']] = $result['field'];
                 }
                 if ($foreign_ids[$relation['foreign_key']] !== null) {
-                    $this->db->query('ALTER TABLE `' . mysqli_real_escape_string($this->db, $data['name']) . '` ADD CONSTRAINT `' . mysqli_real_escape_string($this->db, $data['name'] . '_' . $relation['name'] . '_' . $relation['foreign_key']) . '` FOREIGN KEY (`' . mysqli_real_escape_string($this->db, $relation['name']) . '`) REFERENCES `' . mysqli_real_escape_string($this->db, $relation['foreign_key']) . '`(`' . mysqli_real_escape_string($this->db, $foreign_ids[$relation['foreign_key']]) . '`) ON DELETE RESTRICT ON UPDATE RESTRICT;');
+                    $this->db->query('ALTER TABLE `' . mysqli_real_escape_string($this->db, $data['name']) . '` ADD CONSTRAINT `' . mysqli_real_escape_string($this->db, $this->MakeConstraintName($data['name'], $relation['name'], $relation['foreign_key'])) . '` FOREIGN KEY (`' . mysqli_real_escape_string($this->db, $relation['name']) . '`) REFERENCES `' . mysqli_real_escape_string($this->db, $relation['foreign_key']) . '`(`' . mysqli_real_escape_string($this->db, $foreign_ids[$relation['foreign_key']]) . '`) ON DELETE RESTRICT ON UPDATE RESTRICT;');
                 }
             }
             //add to model table
@@ -235,7 +235,7 @@ class Database
                 $stmt->execute([$data['name'], $field]);
                 $results = $stmt->get_result();
                 while ($record = $results->fetch_assoc()) {
-                    $query = 'ALTER TABLE `' . mysqli_real_escape_string($this->db, $record['table']) . '` DROP FOREIGN KEY `' . $record['table'] . '_' . $record['field'] . '_' . $record['related_table'] . '`';
+                    $query = 'ALTER TABLE `' . mysqli_real_escape_string($this->db, $record['table']) . '` DROP FOREIGN KEY `' . $this->MakeConstraintName($record['table'], $record['field'], $record['related_table']) . '`';
                     $stmt2 = $this->db->prepare($query);
                     $stmt2->execute();
                 }
@@ -273,7 +273,7 @@ class Database
         $stmt->execute([$table_name, $table_name]);
         $results = $stmt->get_result();
         while ($record = $results->fetch_assoc()) {
-            $query = 'ALTER TABLE `' . mysqli_real_escape_string($this->db, $record['table']) . '` DROP FOREIGN KEY `' . $record['table'] . '_' . $record['field'] . '_' . $record['related_table'] . '`';
+            $query = 'ALTER TABLE `' . mysqli_real_escape_string($this->db, $record['table']) . '` DROP FOREIGN KEY `' . $this->MakeConstraintName($record['table'], $record['field'], $record['related_table']) . '`';
             $stmt2 = $this->db->prepare($query);
             $stmt2->execute();
         }
@@ -389,6 +389,19 @@ class Database
             $query .= ' AUTO_INCREMENT ';
         }
         return $query;
+    }
+
+    private function MakeConstraintName(string $table, string $field, string $foreign_table): string
+    {
+        $name = $table . '_' . $field . '_' . $foreign_table;
+        // MySQL identifiers are capped at 64 chars. Names that already fit keep the
+        // legacy format verbatim so existing constraints stay addressable on DROP.
+        if (strlen($name) <= 64) {
+            return $name;
+        }
+        // Deterministic fallback for long names: readable prefix + md5 of the full
+        // legacy name. Same inputs always yield the same name, so create/drop match.
+        return substr($name, 0, 31) . '_' . md5($name); // 31 + 1 + 32 = 64
     }
 
     public function SetQueryCallback(callable $function): void {
